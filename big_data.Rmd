@@ -29,20 +29,48 @@ x <- read_csv("~/data/census/censoc_dmf_v2/censoc_dmf_v2.csv",
 ```
 
 
-```{r sample_1percent}
+```{r sample_1percent, cache = TRUE}
 
 small <- x %>%
   slice_sample(prop = 0.01)
 
 ```
 
-```{r barplot}
+```{r barplot, cache = TRUE}
 
-smallplot <- small %>%
+small_barplot <- small %>%
   ggplot(aes(x = dmonth)) +
   geom_bar()
 
-smallplot
+small_barplot
 
 ```
+```{r, jantojul}
+
+bigdata_plot <-x %>%
+  select(dmonth, dyear) %>%
+  group_by(dmonth, dyear) %>% 
+  summarize(sum_deaths = n(),
+            .groups = "drop") %>%
+  pivot_wider(names_from = dmonth,
+              names_prefix = "dmonth_",
+              values_from = sum_deaths) %>% 
+  mutate(jan_jul_ratio = dmonth_1/dmonth_7) %>%
+  select(dyear, dmonth_1, dmonth_7, jan_jul_ratio) %>%
+  
+  ggplot(mapping = aes(x = dyear,
+                       y = jan_jul_ratio)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              formula = y ~ x) +
+  labs(title = "Mortality Over Time",
+       subtitle = "Why are Januaries becoming more dangerous?",
+       x = "Year of Death",
+       y = "Ratio of January to July Deaths",
+       caption = "Source: CenSoc")
+
+bigdata_plot
+# monthd, , dyear
+```
+
 
